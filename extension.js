@@ -145,7 +145,7 @@ export default class NextUpExtension extends Extension {
     
     if (eventStatus.currentEvent && eventStatus.currentEvent.end) {
       // Event is ongoing. Check how close it is to ENDING (Urgency/Red)
-      const minsLeftToEnd = Math.floor((eventStatus.currentEvent.end.getTime() - nowMs) / 60000);
+      const minsLeftToEnd = Math.ceil((eventStatus.currentEvent.end.getTime() - nowMs) / 60000);
       const urgencyThresh = this._settings.get_int("urgency-threshold");
 
       if (minsLeftToEnd >= 0 && minsLeftToEnd <= urgencyThresh) {
@@ -156,7 +156,7 @@ export default class NextUpExtension extends Extension {
       
     } else if (eventStatus.nextEvent && eventStatus.nextEvent.date) {
       // No active event. Check how close the next one is to STARTING (Warning/Yellow)
-      const minsLeftToStart = Math.floor((eventStatus.nextEvent.date.getTime() - nowMs) / 60000);
+      const minsLeftToStart = Math.ceil((eventStatus.nextEvent.date.getTime() - nowMs) / 60000);
       const warningThresh = this._settings.get_int("warning-threshold");
 
       if (minsLeftToStart >= 0 && minsLeftToStart <= warningThresh) {
