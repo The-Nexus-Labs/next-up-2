@@ -1,14 +1,16 @@
 # Next Up 2
 
 A GNOME Shell extension that shows your next calendar event in the status bar.
-Fork of [Next Up](https://github.com/artisticat1/gnome-next-up) extension
+This Nexus Labs fork builds on [Next Up 2](https://github.com/nanolookc/next-up-2)
+and its unmerged [UI overhaul](https://github.com/nanolookc/next-up-2/pull/4).
 
 ## Features
 
 - Supports GNOME 48, 49, 50
 - Shows current event in indicator text (optional)
 - **Visual Layouts:** Choose between Default and Minimal (short text) styles to save panel space.
-- **Color Thresholds:** Use native GNOME color pickers for active events, warnings (starting soon), and urgency (ending soon).
+- **Countdown Progress:** A thin bar fills during the final hour before the next event starts, or during the final hour of the current event. It uses muted pastel green at 60+ minutes, orange from 10–59 minutes, and red below 10 minutes.
+- **Theme-safe Text:** Only the progress bar is colored, so the indicator text keeps GNOME's native light or dark theme color.
 - **Early Completion:** Use the drop-down action menu to mark an ongoing event as complete and dismiss it from the top bar.
 - **Keyword Filtering:** Automatically hide events containing specific user-defined keywords.
 - **Dynamic Sizing:** Control the maximum pixel width of the indicator before text gracefully truncates.
@@ -18,11 +20,13 @@ Fork of [Next Up](https://github.com/artisticat1/gnome-next-up) extension
 ![screenshot3](screenshots/screenshot3.png)
 ![screenshot4](screenshots/screenshot4.png)
 
-Tested on GNOME 49.
+Tested on GNOME 49 and 50.
 
 ## Installation
 
-You can install the extension from [the extensions.gnome.org page](https://extensions.gnome.org/extension/9194/next-up-2/) by clicking the switch icon.
+The upstream release is available from [extensions.gnome.org](https://extensions.gnome.org/extension/9194/next-up-2/).
+The Nexus Labs variant is intended to be installed from a pinned source revision,
+such as through the accompanying NixOS configuration.
 
 ## Build
 

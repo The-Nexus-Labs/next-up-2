@@ -19,13 +19,6 @@
       <description>The maximum width in pixels before text gets truncated.</description>
     </key>
 
-    <!-- Background Color for Active Events -->
-    <key name="active-bg-color" type="s">
-      <default>'transparent'</default>
-      <summary>Background color when an event is active</summary>
-      <description>Hex color code or rgba value for the active event background.</description>
-    </key>
-
     <!-- Hide Next Task if Current is Active -->
     <key name="hide-next-when-active" type="b">
       <default>false</default>
@@ -35,7 +28,7 @@
 
     <!-- Custom 'Done for the day' Text -->
     <key name="done-text" type="s">
-      <default>'Done for today '</default>
+      <default>'Done for today!'</default>
       <summary>Text to display when no events remain</summary>
       <description>The string displayed when the calendar is clear.</description>
     </key>
@@ -47,30 +40,35 @@
       <description>0: Default, 1: Minimal</description>
     </key>
 
-    <!-- Warning Settings (e.g., 15 mins out) -->
-    <key name="warning-color" type="s">
-      <default>'#ffff00'</default>
-      <summary>Color for approaching events</summary>
-      <description>Color applied when an event is approaching its start time.</description>
+    <!-- Countdown Progress -->
+    <key name="progress-green-color" type="s">
+      <default>'#86C995'</default>
+      <summary>Progress color with at least 60 minutes remaining</summary>
+      <description>A muted pastel green used when an event is not imminent.</description>
     </key>
 
-    <key name="warning-threshold" type="i">
-      <default>15</default>
-      <summary>Warning threshold (minutes)</summary>
-      <description>Minutes before an event starts to apply the warning color.</description>
+    <key name="progress-orange-color" type="s">
+      <default>'#E6A76F'</default>
+      <summary>Progress color with 10 to 59 minutes remaining</summary>
+      <description>A muted pastel orange used as an event approaches.</description>
     </key>
 
-    <!-- Urgency Settings -->
-    <key name="urgency-color" type="s">
-      <default>'#ff0000'</default>
-      <summary>Color for urgent events</summary>
-      <description>Color applied when an event is nearing its start time.</description>
+    <key name="progress-red-color" type="s">
+      <default>'#D98282'</default>
+      <summary>Progress color with less than 10 minutes remaining</summary>
+      <description>A muted pastel red used immediately before an event.</description>
     </key>
 
-    <key name="urgency-threshold" type="i">
+    <key name="progress-orange-threshold" type="i">
+      <default>60</default>
+      <summary>Orange threshold in minutes</summary>
+      <description>The bar becomes orange below this number of minutes.</description>
+    </key>
+
+    <key name="progress-red-threshold" type="i">
       <default>10</default>
-      <summary>Urgency threshold (minutes)</summary>
-      <description>Minutes before an event starts to apply the urgency color.</description>
+      <summary>Red threshold in minutes</summary>
+      <description>The bar becomes red below this number of minutes.</description>
     </key>
 
     <!-- Excluded Keywords -->
