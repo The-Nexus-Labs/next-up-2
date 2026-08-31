@@ -11,5 +11,83 @@
     <key name="show-all-day-events" type="b">
       <default>false</default>
     </key>
+
+    <!-- Max Width -->
+    <key name="max-width" type="i">
+      <default>250</default>
+      <summary>Maximum width of the indicator</summary>
+      <description>The maximum width in pixels before text gets truncated.</description>
+    </key>
+
+    <!-- Hide Next Task if Current is Active -->
+    <key name="hide-next-when-active" type="b">
+      <default>false</default>
+      <summary>Hide next event when one is ongoing</summary>
+      <description>If true, only shows the current active event and hides upcoming ones.</description>
+    </key>
+
+    <!-- Custom 'Done for the day' Text -->
+    <key name="done-text" type="s">
+      <default>'Done for today!'</default>
+      <summary>Text to display when no events remain</summary>
+      <description>The string displayed when the calendar is clear.</description>
+    </key>
+
+    <!-- Visual Layout Options -->
+    <key name="layout-style" type="i">
+      <default>0</default>
+      <summary>Visual layout style</summary>
+      <description>0: Default, 1: Minimal</description>
+    </key>
+
+    <!-- Countdown Progress -->
+    <key name="progress-green-color" type="s">
+      <default>'#86C995'</default>
+      <summary>Progress color with at least 60 minutes remaining</summary>
+      <description>A muted pastel green used when an event is not imminent.</description>
+    </key>
+
+    <key name="progress-orange-color" type="s">
+      <default>'#E6A76F'</default>
+      <summary>Progress color with 10 to 59 minutes remaining</summary>
+      <description>A muted pastel orange used as an event approaches.</description>
+    </key>
+
+    <key name="progress-red-color" type="s">
+      <default>'#D98282'</default>
+      <summary>Progress color with less than 10 minutes remaining</summary>
+      <description>A muted pastel red used immediately before an event.</description>
+    </key>
+
+    <key name="progress-orange-threshold" type="i">
+      <default>60</default>
+      <summary>Orange threshold in minutes</summary>
+      <description>The bar becomes orange below this number of minutes.</description>
+    </key>
+
+    <key name="progress-red-threshold" type="i">
+      <default>10</default>
+      <summary>Red threshold in minutes</summary>
+      <description>The bar becomes red below this number of minutes.</description>
+    </key>
+
+    <!-- Excluded Keywords -->
+    <key name="excluded-keywords" type="s">
+      <default>''</default>
+      <summary>Excluded keywords</summary>
+      <description>Comma-separated list of words. Events containing these will be ignored.</description>
+    </key>
+
+    <!-- Early Completion Toggle -->
+    <key name="enable-early-completion" type="b">
+      <default>true</default>
+      <summary>Enable early completion</summary>
+      <description>Allows dismissing an active event before its scheduled end time.</description>
+    </key>
+
+    <key name="show-confetti-icon" type="b">
+      <default>true</default>
+      <summary>Show party popper icon</summary>
+    </key>
   </schema>
 </schemalist>
