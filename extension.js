@@ -20,12 +20,13 @@ import GLib from "gi://GLib";
 import GObject from "gi://GObject";
 import Gio from "gi://Gio";
 
-import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 import Indicator from "./src/indicator.js";
 import { getCountdownProgress } from "./src/countdown-progress.js";
 import * as DateHelperFunctions from "./src/date.js";
+import PanelLayout from "./src/panel-layout.js";
+import PanelProgress from "./src/panel-progress.js";
 
 const IndicatorInstance = GObject.registerClass(Indicator);
 
@@ -40,15 +41,10 @@ export default class NextUpExtension extends Extension {
       ),
       openPrefsCallback: this.openPreferences.bind(this),
     });
+    this._panelLayout = new PanelLayout(this._indicator.container);
+    this._panelProgress = new PanelProgress();
 
     this._settings = this.getSettings();
-    this._settingChangedSignal = this._settings.connect(
-      "changed::which-panel",
-      () => {
-        this.unloadIndicator();
-        this.loadIndicator();
-      }
-    );
 
     // Wait 3 seconds before loading the indicator
     // So that it isn't loaded too early and positioned after other elements in the panel
@@ -76,25 +72,11 @@ export default class NextUpExtension extends Extension {
   }
 
   loadIndicator() {
-    const boxes = [
-      Main.panel._leftBox,
-      Main.panel._centerBox,
-      Main.panel._rightBox,
-    ];
-
-    const whichPanel = this._settings.get_int("which-panel");
-
-    // If aligned to left, place it after workspaces indicator
-    const index = whichPanel === 0 ? 1 : 0;
-
-    boxes[whichPanel].insert_child_at_index(this._indicator.container, index);
+    this._panelLayout.attach();
   }
 
   unloadIndicator() {
-    const parent = this._indicator.container.get_parent();
-    if (parent) {
-      parent.remove_child(this._indicator.container);
-    }
+    this._panelLayout.detach();
   }
 
   refreshIndicator() {
@@ -151,18 +133,15 @@ export default class NextUpExtension extends Extension {
       this._settings.get_int("progress-red-threshold")
     );
     if (progress === null) {
-      this._indicator.hideProgress();
+      this._panelProgress.hideProgress();
     } else {
       const progressColor = this._settings.get_string(
         `progress-${progress.colorBand}-color`
       );
-      this._indicator.setProgress(progress.fraction, progressColor);
+      this._panelProgress.setProgress(progress.fraction, progressColor);
     }
 
-    // 6. Push sizing and Early Completion state down to the indicator
-    const maxWidth = this._settings.get_int("max-width");
-    this._indicator.setMaxWidth(maxWidth);
-
+    // 6. Push Early Completion state down to the indicator
     if (eventStatus.currentEvent) {
       const currentSummary = (eventStatus.currentEvent.summary || "").toLowerCase();
       const eventKey = currentSummary + (eventStatus.currentEvent.date ? eventStatus.currentEvent.date.getTime() : "");
@@ -189,13 +168,15 @@ export default class NextUpExtension extends Extension {
       this.delaySourceId = null;
     }
 
-    this._settings.disconnect(this._settingChangedSignal);
-    this._settingChangedSignal = null;
-    this._settings = null;
-
     this.unloadIndicator();
     this._indicator.destroy();
     this._indicator = null;
+    this._panelLayout = null;
+
+    this._panelProgress.destroy();
+    this._panelProgress = null;
+
+    this._settings = null;
 
     this._dismissedEvents.clear();
     this._dismissedEvents = null;

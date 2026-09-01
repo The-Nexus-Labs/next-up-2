@@ -1,4 +1,5 @@
 import { getCountdownProgress } from "../src/countdown-progress.js";
+import { computeLeftIndicatorWidth } from "../src/panel-geometry.js";
 
 const now = new Date("2026-08-31T10:00:00Z");
 
@@ -41,4 +42,16 @@ if (noEvent !== null) {
   throw new Error("Expected no countdown when there is no event");
 }
 
-console.log("Countdown progress checks passed");
+const indicatorWidth = computeLeftIndicatorWidth(1920, 120, 100);
+if (indicatorWidth !== 800) {
+  throw new Error(`Expected 800px left indicator, got ${indicatorWidth}px`);
+}
+
+const offsetIndicatorWidth = computeLeftIndicatorWidth(1920, 120, 100, -80);
+if (offsetIndicatorWidth !== 760) {
+  throw new Error(
+    `Expected 760px offset indicator, got ${offsetIndicatorWidth}px`
+  );
+}
+
+console.log("Countdown progress and panel geometry checks passed");

@@ -1,5 +1,6 @@
 import St from "gi://St";
 import Clutter from "gi://Clutter";
+import Pango from "gi://Pango";
 import * as Calendar from "resource:///org/gnome/shell/ui/calendar.js";
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
@@ -12,7 +13,6 @@ export default class Indicator extends PanelMenu.Button {
     this._confettiGicon = props.confettiGicon;
     this._openPrefsCallback = props.openPrefsCallback;
     this._earlyDoneCallback = null;
-    this._progressFraction = 0;
   }
 
   _init() {
@@ -25,20 +25,13 @@ export default class Indicator extends PanelMenu.Button {
   }
 
   _loadGUI() {
-    this._contentLayout = new St.BoxLayout({
-      vertical: true,
-      clip_to_allocation: true,
-      x_expand: true,
-      y_align: Clutter.ActorAlign.CENTER,
-    });
-
     this._menuLayout = new St.BoxLayout({
       vertical: false,
       clip_to_allocation: true,
-      x_align: Clutter.ActorAlign.START,
       y_align: Clutter.ActorAlign.CENTER,
       reactive: true,
       x_expand: true,
+      x_align: Clutter.ActorAlign.FILL,
     });
 
     this.icon = new St.Icon({
@@ -49,34 +42,19 @@ export default class Indicator extends PanelMenu.Button {
     // Ensure the label truncates neatly with CSS
     this.text = new St.Label({
       text: "Loading",
+      x_expand: true,
+      x_align: Clutter.ActorAlign.FILL,
       y_expand: true,
       y_align: Clutter.ActorAlign.CENTER,
       style: "text-overflow: ellipsis; white-space: nowrap;",
     });
+    this.text.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+    this.text.clutter_text.single_line_mode = true;
 
     this._menuLayout.add_child(this.icon);
     this._menuLayout.add_child(this.text);
 
-    this._progressFill = new St.Widget({
-      x_align: Clutter.ActorAlign.START,
-      y_expand: true,
-    });
-    this._progressTrack = new St.Bin({
-      child: this._progressFill,
-      x_expand: true,
-      height: 3,
-      style:
-        "background-color: rgba(128, 128, 128, 0.28); " +
-        "border-radius: 2px; margin: 0 2px 1px 2px;",
-    });
-    this._progressTrack.connect("notify::width", () => {
-      this._updateProgressWidth();
-    });
-    this._progressTrack.hide();
-
-    this._contentLayout.add_child(this._menuLayout);
-    this._contentLayout.add_child(this._progressTrack);
-    this.add_child(this._contentLayout);
+    this.add_child(this._menuLayout);
   }
 
   _initialiseMenu() {
@@ -150,37 +128,6 @@ export default class Indicator extends PanelMenu.Button {
     } else {
       this.icon.hide();
     }
-  }
-
-  setMaxWidth(maxWidth) {
-    this._contentLayout.set_style(`max-width: ${maxWidth}px;`);
-  }
-
-  setProgress(fraction, color) {
-    this._progressFraction = Math.min(1, Math.max(0, fraction));
-    this._progressFill.set_style(
-      `background-color: ${color}; border-radius: 2px;`
-    );
-    this._progressTrack.show();
-    this._updateProgressWidth();
-  }
-
-  hideProgress() {
-    this._progressTrack.hide();
-  }
-
-  _updateProgressWidth() {
-    const trackWidth = this._progressTrack.get_width();
-    if (trackWidth <= 0 || !this._progressTrack.visible) {
-      return;
-    }
-
-    // Keep a quiet color marker visible for events more than an hour away,
-    // while the fill grows across the final countdown hour.
-    const visibleFraction = Math.max(0.04, this._progressFraction);
-    this._progressFill.set_width(
-      Math.min(trackWidth, Math.max(3, Math.round(trackWidth * visibleFraction)))
-    );
   }
 
   setupEarlyCompletion(enable, callback) {

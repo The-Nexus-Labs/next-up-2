@@ -2,21 +2,11 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.next-up-2" path="/org/gnome/shell/extensions/next-up-2/">
     <!-- See also: https://docs.gtk.org/glib/gvariant-format-strings.html -->
-    <key name="which-panel" type="i">
-      <default>1</default>
-    </key>
     <key name="text-format" type="i">
       <default>1</default>
     </key>
     <key name="show-all-day-events" type="b">
       <default>false</default>
-    </key>
-
-    <!-- Max Width -->
-    <key name="max-width" type="i">
-      <default>250</default>
-      <summary>Maximum width of the indicator</summary>
-      <description>The maximum width in pixels before text gets truncated.</description>
     </key>
 
     <!-- Hide Next Task if Current is Active -->
