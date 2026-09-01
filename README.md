@@ -9,11 +9,12 @@ and its unmerged [UI overhaul](https://github.com/nanolookc/next-up-2/pull/4).
 - Supports GNOME 48, 49, 50
 - Shows current event in indicator text (optional)
 - **Visual Layouts:** Choose between Default and Minimal (short text) styles to save panel space.
-- **Countdown Progress:** A thin bar fills during the final hour before the next event starts, or during the final hour of the current event. It uses muted pastel green at 60+ minutes, orange from 10–59 minutes, and red below 10 minutes.
+- **Centered Clock Layout:** The event indicator fills the space between the workspace control and GNOME's independently centered clock.
+- **Panel-wide Progress:** The top bar itself fills during the final hour before the next event starts, or during the final hour of the current event. It uses muted pastel green at 60+ minutes, orange from 10–59 minutes, and red below 10 minutes.
 - **Theme-safe Text:** Only the progress bar is colored, so the indicator text keeps GNOME's native light or dark theme color.
 - **Early Completion:** Use the drop-down action menu to mark an ongoing event as complete and dismiss it from the top bar.
 - **Keyword Filtering:** Automatically hide events containing specific user-defined keywords.
-- **Dynamic Sizing:** Control the maximum pixel width of the indicator before text gracefully truncates.
+- **Dynamic Sizing:** The indicator follows the available monitor width and gracefully truncates long event text.
 
 ![screenshot1](screenshots/screenshot1.png)
 ![screenshot2](screenshots/screenshot2.png)

@@ -22,17 +22,6 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
     const groupGeneral = new Adw.PreferencesGroup({ title: _("General Layout & Text") });
     page.add(groupGeneral);
 
-    // Original: Panel to show indicator
-    const panelRow = new Adw.ActionRow({ title: _("Panel to show indicator in") });
-    const dropdown = new Gtk.DropDown({
-      model: Gtk.StringList.new([_("Left"), _("Center"), _("Right")]),
-      valign: Gtk.Align.CENTER,
-    });
-    settings.bind("which-panel", dropdown, "selected", Gio.SettingsBindFlags.DEFAULT);
-    panelRow.add_suffix(dropdown);
-    panelRow.activatable_widget = dropdown;
-    groupGeneral.add(panelRow);
-
     // Original: Show current event in text
     const textRow = new Adw.ActionRow({ title: _("Show current event in indicator text") });
     const textDropdown = new Gtk.DropDown({
@@ -54,19 +43,6 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
     layoutRow.add_suffix(layoutDropdown);
     layoutRow.activatable_widget = layoutDropdown;
     groupGeneral.add(layoutRow);
-
-    // New: Max Width
-    const maxWidthRow = new Adw.ActionRow({
-      title: _("Maximum Indicator Width"),
-      subtitle: _("Pixels before text truncates")
-    });
-    const maxWidthSpin = new Gtk.SpinButton({
-      adjustment: new Gtk.Adjustment({ lower: 50, upper: 1000, step_increment: 10 }),
-      valign: Gtk.Align.CENTER
-    });
-    settings.bind("max-width", maxWidthSpin, "value", Gio.SettingsBindFlags.DEFAULT);
-    maxWidthRow.add_suffix(maxWidthSpin);
-    groupGeneral.add(maxWidthRow);
 
     // New: Done Text
     const doneTextRow = new Adw.EntryRow({ title: _("Done for the day text") });
