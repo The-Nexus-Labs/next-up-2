@@ -54,10 +54,10 @@ if (indicatorWidth !== 800) {
   throw new Error(`Expected 800px left indicator, got ${indicatorWidth}px`);
 }
 
-const offsetIndicatorWidth = computeLeftIndicatorWidth(1920, 120, 100, -80);
-if (offsetIndicatorWidth !== 760) {
+const clockCenter = 100 + indicatorWidth + 120 / 2;
+if (clockCenter !== 1920 / 2) {
   throw new Error(
-    `Expected 760px offset indicator, got ${offsetIndicatorWidth}px`
+    `Expected clock center at 960px, got ${clockCenter}px`
   );
 }
 

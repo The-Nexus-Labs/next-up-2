@@ -102,19 +102,12 @@ export default class PanelLayout {
       leftNaturalWidth - indicatorNaturalWidth
     );
 
-    let centerOffset = 0;
-    const monitor = Main.layoutManager.findMonitorForActor(Main.panel);
-    if (monitor) {
-      const workArea = Main.layoutManager.getWorkAreaForMonitor(monitor.index);
-      centerOffset =
-        2 * (workArea.x - monitor.x) + workArea.width - monitor.width;
-    }
-
+    // Keep GNOME's center box on the physical panel midpoint. Work areas can
+    // be asymmetric when a dock reserves space on only one side.
     const width = computeLeftIndicatorWidth(
       panelWidth,
       centerWidth,
-      occupiedLeftWidth,
-      centerOffset
+      occupiedLeftWidth
     );
 
     if (this._indicatorContainer.get_width() !== width) {

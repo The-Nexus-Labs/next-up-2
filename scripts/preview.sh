@@ -105,7 +105,7 @@ preview_root="$(mktemp -d "${TMPDIR:-/tmp}/next-up-2-preview.XXXXXX")"
 cleanup_preview() {
   if command -v fusermount3 >/dev/null 2>&1 &&
     [[ -d "$preview_root/runtime/doc" ]]; then
-    fusermount3 -u "$preview_root/runtime/doc" || true
+    fusermount3 -u "$preview_root/runtime/doc" 2>/dev/null || true
   fi
   rm -rf -- "$preview_root" || true
 }
@@ -138,7 +138,7 @@ elif [[ ! -f "$extension_dir/schemas/gschemas.compiled" ]]; then
   exit 1
 fi
 
-export GSETTINGS_BACKEND=memory
+export GSETTINGS_BACKEND=keyfile
 export NEXT_UP_PREVIEW_LOG="$preview_root/gnome-shell.log"
 export NEXT_UP_PREVIEW_MINUTES="$minutes"
 export NEXT_UP_PREVIEW_TITLE="Preview meeting"
