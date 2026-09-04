@@ -33,8 +33,8 @@
     <!-- Countdown Progress -->
     <key name="progress-green-color" type="s">
       <default>'#86C995'</default>
-      <summary>Progress color with at least 60 minutes remaining</summary>
-      <description>A muted pastel green used when an event is not imminent.</description>
+      <summary>Legacy progress color</summary>
+      <description>Retained for settings compatibility; the progress track is hidden outside the final hour.</description>
     </key>
 
     <key name="progress-orange-color" type="s">
@@ -51,8 +51,8 @@
 
     <key name="progress-orange-threshold" type="i">
       <default>60</default>
-      <summary>Orange threshold in minutes</summary>
-      <description>The bar becomes orange below this number of minutes.</description>
+      <summary>Progress window in minutes</summary>
+      <description>The track appears below this number of minutes and represents that complete time window.</description>
     </key>
 
     <key name="progress-red-threshold" type="i">

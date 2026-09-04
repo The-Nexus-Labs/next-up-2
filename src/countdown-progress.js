@@ -35,11 +35,13 @@ export function getCountdownProgress(
     Math.ceil((target.getTime() - now.getTime()) / 60000)
   );
 
-  let colorBand = "green";
+  if (minutesRemaining >= orangeThreshold) {
+    return null;
+  }
+
+  let colorBand = "orange";
   if (minutesRemaining < redThreshold) {
     colorBand = "red";
-  } else if (minutesRemaining < orangeThreshold) {
-    colorBand = "orange";
   }
 
   return {

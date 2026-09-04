@@ -26,7 +26,10 @@ import Indicator from "./src/indicator.js";
 import { getCountdownProgress } from "./src/countdown-progress.js";
 import * as DateHelperFunctions from "./src/date.js";
 import PanelLayout from "./src/panel-layout.js";
-import PanelProgress from "./src/panel-progress.js";
+import {
+  getDevelopmentPreview,
+  scheduleDevelopmentScreenshot,
+} from "./src/development-preview.js";
 
 const IndicatorInstance = GObject.registerClass(Indicator);
 
@@ -42,7 +45,6 @@ export default class NextUpExtension extends Extension {
       openPrefsCallback: this.openPreferences.bind(this),
     });
     this._panelLayout = new PanelLayout(this._indicator.container);
-    this._panelProgress = new PanelProgress();
 
     this._settings = this.getSettings();
 
@@ -54,6 +56,10 @@ export default class NextUpExtension extends Extension {
       () => {
         this.loadIndicator();
         this.refreshIndicator();
+        this._developmentScreenshotSourceId =
+          scheduleDevelopmentScreenshot(() => {
+            this._developmentScreenshotSourceId = null;
+          });
         this._startLoop();
         return false;
       }
@@ -102,7 +108,9 @@ export default class NextUpExtension extends Extension {
       return true;
     });
 
-    let eventStatus = DateHelperFunctions.getNextEventsToDisplay(todaysEvents);
+    let eventStatus =
+      getDevelopmentPreview(new Date()) ??
+      DateHelperFunctions.getNextEventsToDisplay(todaysEvents);
 
     // 3. Hide Next When Active
     if (this._settings.get_boolean("hide-next-when-active") && eventStatus.currentEvent) {
@@ -133,12 +141,12 @@ export default class NextUpExtension extends Extension {
       this._settings.get_int("progress-red-threshold")
     );
     if (progress === null) {
-      this._panelProgress.hideProgress();
+      this._indicator.hideProgress();
     } else {
       const progressColor = this._settings.get_string(
         `progress-${progress.colorBand}-color`
       );
-      this._panelProgress.setProgress(progress.fraction, progressColor);
+      this._indicator.setProgress(progress.fraction, progressColor);
     }
 
     // 6. Push Early Completion state down to the indicator
@@ -168,13 +176,15 @@ export default class NextUpExtension extends Extension {
       this.delaySourceId = null;
     }
 
+    if (this._developmentScreenshotSourceId) {
+      GLib.Source.remove(this._developmentScreenshotSourceId);
+      this._developmentScreenshotSourceId = null;
+    }
+
     this.unloadIndicator();
     this._indicator.destroy();
     this._indicator = null;
     this._panelLayout = null;
-
-    this._panelProgress.destroy();
-    this._panelProgress = null;
 
     this._settings = null;
 

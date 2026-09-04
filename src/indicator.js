@@ -7,6 +7,8 @@ import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
 import { gettext as _ } from "resource:///org/gnome/shell/extensions/extension.js";
 
+import PanelProgress from "./panel-progress.js";
+
 export default class Indicator extends PanelMenu.Button {
   constructor(props) {
     super();
@@ -25,11 +27,19 @@ export default class Indicator extends PanelMenu.Button {
   }
 
   _loadGUI() {
-    this._menuLayout = new St.BoxLayout({
-      vertical: false,
+    this._menuLayout = new St.Widget({
+      layout_manager: new Clutter.BinLayout(),
       clip_to_allocation: true,
       y_align: Clutter.ActorAlign.CENTER,
-      reactive: true,
+      x_expand: true,
+      x_align: Clutter.ActorAlign.FILL,
+    });
+
+    this._panelProgress = new PanelProgress();
+
+    this._contentLayout = new St.BoxLayout({
+      vertical: false,
+      y_align: Clutter.ActorAlign.CENTER,
       x_expand: true,
       x_align: Clutter.ActorAlign.FILL,
     });
@@ -51,8 +61,11 @@ export default class Indicator extends PanelMenu.Button {
     this.text.clutter_text.ellipsize = Pango.EllipsizeMode.END;
     this.text.clutter_text.single_line_mode = true;
 
-    this._menuLayout.add_child(this.icon);
-    this._menuLayout.add_child(this.text);
+    this._contentLayout.add_child(this.icon);
+    this._contentLayout.add_child(this.text);
+
+    this._menuLayout.add_child(this._panelProgress.actor);
+    this._menuLayout.add_child(this._contentLayout);
 
     this.add_child(this._menuLayout);
   }
@@ -116,6 +129,14 @@ export default class Indicator extends PanelMenu.Button {
     this.text.set_text(text);
   }
 
+  setProgress(fraction, color) {
+    this._panelProgress.setProgress(fraction, color);
+  }
+
+  hideProgress() {
+    this._panelProgress.hideProgress();
+  }
+
   showAlarmIcon() {
     this.icon.set_icon_name("alarm-symbolic");
     this.icon.show();
@@ -148,6 +169,8 @@ export default class Indicator extends PanelMenu.Button {
       this._calendarSource.destroy();
       this._calendarSource = null;
     }
+    this._panelProgress.destroy();
+    this._panelProgress = null;
     super.destroy();
   }
 }
