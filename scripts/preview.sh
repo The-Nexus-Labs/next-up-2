@@ -109,11 +109,12 @@ capture_file="$preview_root/capture.png"
 mkdir -p "$extension_dir"
 cp "$ROOT_DIR/extension.js" "$ROOT_DIR/metadata.json" "$ROOT_DIR/prefs.js" "$extension_dir/"
 cp -R "$ROOT_DIR/assets" "$ROOT_DIR/schemas" "$ROOT_DIR/src" "$extension_dir/"
-if ! command -v glib-compile-schemas >/dev/null 2>&1; then
-  printf 'glib-compile-schemas is required to build the preview schema.\n' >&2
+if command -v glib-compile-schemas >/dev/null 2>&1; then
+  glib-compile-schemas --strict "$extension_dir/schemas"
+elif [[ ! -f "$extension_dir/schemas/gschemas.compiled" ]]; then
+  printf 'glib-compile-schemas is required when no bundled schema exists.\n' >&2
   exit 1
 fi
-glib-compile-schemas --strict "$extension_dir/schemas"
 
 export GSETTINGS_BACKEND=memory
 export NEXT_UP_PREVIEW_LOG="$preview_root/gnome-shell.log"

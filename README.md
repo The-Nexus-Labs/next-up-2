@@ -54,7 +54,9 @@ meeting at the requested number of minutes, launches `gnome-shell --devkit`,
 captures the rendered desktop to `dist/preview-43-minutes.png`, and closes the
 nested shell. Set `NEXT_UP_PREVIEW_HOLD=true` to leave the preview window open
 after taking the screenshot. The development calendar hook is inactive unless
-`NEXT_UP_PREVIEW_MINUTES` is explicitly set.
+`NEXT_UP_PREVIEW_MINUTES` is explicitly set. The bundled compiled schema is
+enough for visual work; install `glib-compile-schemas` before changing schema
+keys or defaults.
 
 ## References
 
