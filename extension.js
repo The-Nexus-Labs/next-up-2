@@ -138,6 +138,7 @@ export default class NextUpExtension extends Extension {
       eventStatus,
       new Date(),
       this._settings.get_int("progress-orange-threshold"),
+      this._settings.get_int("progress-yellow-threshold"),
       this._settings.get_int("progress-red-threshold")
     );
     if (progress === null) {

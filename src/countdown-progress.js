@@ -1,4 +1,5 @@
-export const DEFAULT_ORANGE_THRESHOLD_MINUTES = 60;
+export const DEFAULT_PROGRESS_WINDOW_MINUTES = 60;
+export const DEFAULT_YELLOW_THRESHOLD_MINUTES = 30;
 export const DEFAULT_RED_THRESHOLD_MINUTES = 10;
 
 function clamp(value, minimum, maximum) {
@@ -20,7 +21,8 @@ function countdownTarget(eventStatus) {
 export function getCountdownProgress(
   eventStatus,
   now = new Date(),
-  orangeThresholdMinutes = DEFAULT_ORANGE_THRESHOLD_MINUTES,
+  progressWindowMinutes = DEFAULT_PROGRESS_WINDOW_MINUTES,
+  yellowThresholdMinutes = DEFAULT_YELLOW_THRESHOLD_MINUTES,
   redThresholdMinutes = DEFAULT_RED_THRESHOLD_MINUTES
 ) {
   const target = countdownTarget(eventStatus);
@@ -28,25 +30,32 @@ export function getCountdownProgress(
     return null;
   }
 
-  const orangeThreshold = Math.max(1, orangeThresholdMinutes);
-  const redThreshold = clamp(redThresholdMinutes, 0, orangeThreshold);
+  const progressWindow = Math.max(1, progressWindowMinutes);
+  const yellowThreshold = clamp(
+    yellowThresholdMinutes,
+    0,
+    progressWindow
+  );
+  const redThreshold = clamp(redThresholdMinutes, 0, yellowThreshold);
   const minutesRemaining = Math.max(
     0,
     Math.ceil((target.getTime() - now.getTime()) / 60000)
   );
 
-  if (minutesRemaining >= orangeThreshold) {
+  if (minutesRemaining > progressWindow) {
     return null;
   }
 
-  let colorBand = "orange";
-  if (minutesRemaining < redThreshold) {
+  let colorBand = "green";
+  if (minutesRemaining <= redThreshold) {
     colorBand = "red";
+  } else if (minutesRemaining <= yellowThreshold) {
+    colorBand = "yellow";
   }
 
   return {
     colorBand,
     minutesRemaining,
-    fraction: clamp(1 - minutesRemaining / orangeThreshold, 0, 1),
+    fraction: clamp(1 - minutesRemaining / progressWindow, 0, 1),
   };
 }

@@ -25,18 +25,21 @@ function assertProgress(minutes, expectedBand, expectedFraction, current = false
   }
 }
 
-for (const minutes of [90, 60]) {
+for (const minutes of [90, 61]) {
   const progress = getCountdownProgress(eventStatus(minutes), now);
   if (progress !== null) {
     throw new Error(`${minutes} minutes: expected the progress bar to be hidden`);
   }
 }
-assertProgress(59, "orange", 1 / 60);
-assertProgress(30, "orange", 0.5);
-assertProgress(10, "orange", 5 / 6);
+assertProgress(60, "green", 0);
+assertProgress(59, "green", 1 / 60);
+assertProgress(31, "green", 29 / 60);
+assertProgress(30, "yellow", 0.5);
+assertProgress(11, "yellow", 49 / 60);
+assertProgress(10, "red", 5 / 6);
 assertProgress(9, "red", 0.85);
 assertProgress(0, "red", 1);
-assertProgress(30, "orange", 0.5, true);
+assertProgress(30, "yellow", 0.5, true);
 
 const noEvent = getCountdownProgress(
   { currentEvent: null, nextEvent: null },

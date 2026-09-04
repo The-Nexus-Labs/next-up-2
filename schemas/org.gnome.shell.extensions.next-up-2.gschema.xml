@@ -32,21 +32,27 @@
 
     <!-- Countdown Progress -->
     <key name="progress-green-color" type="s">
-      <default>'#86C995'</default>
-      <summary>Legacy progress color</summary>
-      <description>Retained for settings compatibility; the progress track is hidden outside the final hour.</description>
+      <default>'#3D8B5A'</default>
+      <summary>Progress color with 31 to 60 minutes remaining</summary>
+      <description>A muted green used at the start of the final hour.</description>
     </key>
 
     <key name="progress-orange-color" type="s">
       <default>'#A15C2A'</default>
-      <summary>Progress color with 10 to 59 minutes remaining</summary>
-      <description>A muted deep orange used as an event approaches.</description>
+      <summary>Legacy orange progress color</summary>
+      <description>Retained for settings compatibility.</description>
+    </key>
+
+    <key name="progress-yellow-color" type="s">
+      <default>'#D6A21C'</default>
+      <summary>Progress color with 11 to 30 minutes remaining</summary>
+      <description>A clear golden yellow used as an event approaches.</description>
     </key>
 
     <key name="progress-red-color" type="s">
-      <default>'#934040'</default>
-      <summary>Progress color with less than 10 minutes remaining</summary>
-      <description>A muted deep red used immediately before an event.</description>
+      <default>'#C74747'</default>
+      <summary>Progress color with 0 to 10 minutes remaining</summary>
+      <description>A clear red used immediately before an event.</description>
     </key>
 
     <key name="progress-orange-threshold" type="i">
@@ -55,10 +61,16 @@
       <description>The track appears below this number of minutes and represents that complete time window.</description>
     </key>
 
+    <key name="progress-yellow-threshold" type="i">
+      <default>30</default>
+      <summary>Yellow threshold in minutes</summary>
+      <description>The bar becomes yellow at or below this number of minutes.</description>
+    </key>
+
     <key name="progress-red-threshold" type="i">
       <default>10</default>
       <summary>Red threshold in minutes</summary>
-      <description>The bar becomes red below this number of minutes.</description>
+      <description>The bar becomes red at or below this number of minutes.</description>
     </key>
 
     <!-- Excluded Keywords -->

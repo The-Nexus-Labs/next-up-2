@@ -86,14 +86,15 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
       groupVisual.add(row);
     };
 
-    addColorPicker("progress-orange-color", _("10 to 59 minutes"));
-    addColorPicker("progress-red-color", _("Less than 10 minutes"));
+    addColorPicker("progress-green-color", _("31 to 60 minutes"));
+    addColorPicker("progress-yellow-color", _("11 to 30 minutes"));
+    addColorPicker("progress-red-color", _("0 to 10 minutes"));
 
-    const orangeThresholdRow = new Adw.ActionRow({
+    const progressWindowRow = new Adw.ActionRow({
       title: _("Progress window"),
       subtitle: _("Minutes remaining"),
     });
-    const orangeThresholdSpin = new Gtk.SpinButton({
+    const progressWindowSpin = new Gtk.SpinButton({
       adjustment: new Gtk.Adjustment({
         lower: 1,
         upper: 240,
@@ -103,12 +104,33 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
     });
     settings.bind(
       "progress-orange-threshold",
-      orangeThresholdSpin,
+      progressWindowSpin,
       "value",
       Gio.SettingsBindFlags.DEFAULT
     );
-    orangeThresholdRow.add_suffix(orangeThresholdSpin);
-    groupVisual.add(orangeThresholdRow);
+    progressWindowRow.add_suffix(progressWindowSpin);
+    groupVisual.add(progressWindowRow);
+
+    const yellowThresholdRow = new Adw.ActionRow({
+      title: _("Yellow threshold"),
+      subtitle: _("Minutes remaining"),
+    });
+    const yellowThresholdSpin = new Gtk.SpinButton({
+      adjustment: new Gtk.Adjustment({
+        lower: 0,
+        upper: 120,
+        step_increment: 1,
+      }),
+      valign: Gtk.Align.CENTER,
+    });
+    settings.bind(
+      "progress-yellow-threshold",
+      yellowThresholdSpin,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT
+    );
+    yellowThresholdRow.add_suffix(yellowThresholdSpin);
+    groupVisual.add(yellowThresholdRow);
 
     const redThresholdRow = new Adw.ActionRow({
       title: _("Red threshold"),

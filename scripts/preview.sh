@@ -58,7 +58,9 @@ run_nested_session() {
 
   # The extension attaches after three seconds, then captures itself after the
   # next complete second so panel allocation and painting have settled.
-  for _ in $(seq 1 80); do
+  # Portal activation can take about 25 seconds on a cold nested session.
+  # Leave enough time for GNOME Shell to finish startup and write the capture.
+  for _ in $(seq 1 500); do
     if [[ -s "$screenshot_file" ]]; then
       break
     fi
@@ -98,15 +100,35 @@ fi
 mkdir -p "$(dirname "$screenshot_file")"
 screenshot_file="$(realpath -m "$screenshot_file")"
 
+host_runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 preview_root="$(mktemp -d "${TMPDIR:-/tmp}/next-up-2-preview.XXXXXX")"
 cleanup_preview() {
+  if command -v fusermount3 >/dev/null 2>&1 &&
+    [[ -d "$preview_root/runtime/doc" ]]; then
+    fusermount3 -u "$preview_root/runtime/doc" || true
+  fi
   rm -rf -- "$preview_root" || true
 }
 trap cleanup_preview EXIT
 
 extension_dir="$preview_root/data/gnome-shell/extensions/$UUID"
 capture_file="$preview_root/capture.png"
-mkdir -p "$extension_dir"
+mkdir -p \
+  "$extension_dir" \
+  "$preview_root/cache" \
+  "$preview_root/config" \
+  "$preview_root/runtime" \
+  "$preview_root/state"
+chmod 700 "$preview_root/runtime"
+for runtime_socket in pipewire-0 pipewire-0-manager; do
+  if [[ -S "$host_runtime_dir/$runtime_socket" ]]; then
+    ln -s "$host_runtime_dir/$runtime_socket" "$preview_root/runtime/$runtime_socket"
+  fi
+done
+if [[ -S "$host_runtime_dir/pulse/native" ]]; then
+  mkdir -p "$preview_root/runtime/pulse"
+  ln -s "$host_runtime_dir/pulse/native" "$preview_root/runtime/pulse/native"
+fi
 cp "$ROOT_DIR/extension.js" "$ROOT_DIR/metadata.json" "$ROOT_DIR/prefs.js" "$extension_dir/"
 cp -R "$ROOT_DIR/assets" "$ROOT_DIR/schemas" "$ROOT_DIR/src" "$extension_dir/"
 if command -v glib-compile-schemas >/dev/null 2>&1; then
@@ -121,7 +143,11 @@ export NEXT_UP_PREVIEW_LOG="$preview_root/gnome-shell.log"
 export NEXT_UP_PREVIEW_MINUTES="$minutes"
 export NEXT_UP_PREVIEW_TITLE="Preview meeting"
 export NEXT_UP_SCREENSHOT_FILE="$capture_file"
+export XDG_CACHE_HOME="$preview_root/cache"
+export XDG_CONFIG_HOME="$preview_root/config"
 export XDG_DATA_HOME="$preview_root/data"
+export XDG_RUNTIME_DIR="$preview_root/runtime"
+export XDG_STATE_HOME="$preview_root/state"
 
 session_log="$preview_root/session.log"
 if ! dbus-run-session -- "$ROOT_DIR/scripts/preview.sh" \
