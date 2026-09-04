@@ -3,9 +3,9 @@ import St from "gi://St";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
-const FILL_OPACITY = 92;
-const TRACK_BACKGROUND_OPACITY = 20;
-const TRACK_OUTLINE_OPACITY = 74;
+const FILL_OPACITY = 150;
+const TRACK_BACKGROUND_OPACITY = 24;
+const TRACK_OUTLINE_OPACITY = 82;
 
 function colorToCss(color, opacity = color.alpha) {
   return `rgba(${color.red}, ${color.green}, ${color.blue}, ${opacity / 255})`;
@@ -23,25 +23,31 @@ export default class PanelProgress {
       reactive: false,
     });
 
+    this._outline = new St.Widget({
+      reactive: false,
+      style: [
+        `box-shadow: inset 0 0 0 1px ${colorToCss(panelForeground, TRACK_OUTLINE_OPACITY)};`,
+        "border-radius: 999px;",
+      ].join(" "),
+    });
+
     this.actor = new St.Widget({
       layout_manager: new Clutter.FixedLayout(),
       x_align: Clutter.ActorAlign.FILL,
       x_expand: true,
       y_align: Clutter.ActorAlign.FILL,
       y_expand: true,
-      margin_top: 2,
-      margin_bottom: 2,
       margin_left: 3,
       margin_right: 3,
       clip_to_allocation: true,
       reactive: false,
       style: [
         `background-color: ${colorToCss(panelForeground, TRACK_BACKGROUND_OPACITY)};`,
-        `box-shadow: inset 0 0 0 1px ${colorToCss(panelForeground, TRACK_OUTLINE_OPACITY)};`,
-        "border-radius: 9px;",
+        "border-radius: 999px;",
       ].join(" "),
     });
     this.actor.add_child(this._fill);
+    this.actor.add_child(this._outline);
     this.actor.hide();
 
     this._allocationSignalId = this.actor.connect("notify::allocation", () => {
@@ -53,7 +59,7 @@ export default class PanelProgress {
     this._fraction = Math.min(1, Math.max(0, fraction));
     this._hasProgress = true;
     this._fill.set_style(
-      `background-color: ${color}; border-radius: 8px;`
+      `background-color: ${color}; border-radius: 999px;`
     );
     this._fill.show();
     this.actor.show();
@@ -71,6 +77,7 @@ export default class PanelProgress {
     this.actor.destroy();
 
     this._fill = null;
+    this._outline = null;
     this.actor = null;
   }
 
@@ -79,12 +86,14 @@ export default class PanelProgress {
       return;
     }
 
-    const trackWidth = Math.max(0, this.actor.get_width() - 2);
-    const trackHeight = Math.max(0, this.actor.get_height() - 2);
-    this._fill.set_position(1, 1);
+    const trackWidth = this.actor.get_width();
+    const trackHeight = this.actor.get_height();
+    this._fill.set_position(0, 0);
     this._fill.set_size(
       Math.round(trackWidth * this._fraction),
       trackHeight
     );
+    this._outline.set_position(0, 0);
+    this._outline.set_size(trackWidth, trackHeight);
   }
 }

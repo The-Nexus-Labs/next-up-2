@@ -38,15 +38,15 @@
     </key>
 
     <key name="progress-orange-color" type="s">
-      <default>'#E6A76F'</default>
+      <default>'#A15C2A'</default>
       <summary>Progress color with 10 to 59 minutes remaining</summary>
-      <description>A muted pastel orange used as an event approaches.</description>
+      <description>A muted deep orange used as an event approaches.</description>
     </key>
 
     <key name="progress-red-color" type="s">
-      <default>'#D98282'</default>
+      <default>'#934040'</default>
       <summary>Progress color with less than 10 minutes remaining</summary>
-      <description>A muted pastel red used immediately before an event.</description>
+      <description>A muted deep red used immediately before an event.</description>
     </key>
 
     <key name="progress-orange-threshold" type="i">
