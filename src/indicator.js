@@ -30,7 +30,8 @@ export default class Indicator extends PanelMenu.Button {
     this._menuLayout = new St.Widget({
       layout_manager: new Clutter.BinLayout(),
       clip_to_allocation: true,
-      y_align: Clutter.ActorAlign.CENTER,
+      y_align: Clutter.ActorAlign.FILL,
+      y_expand: true,
       x_expand: true,
       x_align: Clutter.ActorAlign.FILL,
     });
