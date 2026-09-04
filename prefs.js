@@ -86,12 +86,11 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
       groupVisual.add(row);
     };
 
-    addColorPicker("progress-green-color", _("60 minutes or more"));
     addColorPicker("progress-orange-color", _("10 to 59 minutes"));
     addColorPicker("progress-red-color", _("Less than 10 minutes"));
 
     const orangeThresholdRow = new Adw.ActionRow({
-      title: _("Orange threshold"),
+      title: _("Progress window"),
       subtitle: _("Minutes remaining"),
     });
     const orangeThresholdSpin = new Gtk.SpinButton({

@@ -3,88 +3,75 @@ import St from "gi://St";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
-const MINIMUM_VISIBLE_FRACTION = 0.04;
-const FILL_OPACITY = 82;
+const FILL_OPACITY = 92;
+const TRACK_BACKGROUND_OPACITY = 20;
+const TRACK_OUTLINE_OPACITY = 74;
 
-function colorToCss(color) {
-  return `rgba(${color.red}, ${color.green}, ${color.blue}, ${
-    color.alpha / 255
-  })`;
+function colorToCss(color, opacity = color.alpha) {
+  return `rgba(${color.red}, ${color.green}, ${color.blue}, ${opacity / 255})`;
 }
 
 export default class PanelProgress {
   constructor() {
-    const panelColor = Main.panel.get_theme_node().get_background_color();
+    const panelForeground = Main.panel.get_theme_node().get_foreground_color();
 
-    this._previousPanelStyle = Main.panel.get_style();
     this._fraction = 0;
     this._hasProgress = false;
 
     this._fill = new St.Widget({
-      x_align: Clutter.ActorAlign.START,
-      y_align: Clutter.ActorAlign.FILL,
-      y_expand: true,
       opacity: FILL_OPACITY,
       reactive: false,
     });
 
-    this._backdrop = new St.Widget({
-      layout_manager: new Clutter.BinLayout(),
+    this.actor = new St.Widget({
+      layout_manager: new Clutter.FixedLayout(),
+      x_align: Clutter.ActorAlign.FILL,
+      x_expand: true,
+      y_align: Clutter.ActorAlign.FILL,
+      y_expand: true,
+      margin_top: 2,
+      margin_bottom: 2,
+      margin_left: 3,
+      margin_right: 3,
+      clip_to_allocation: true,
       reactive: false,
-      style: `background-color: ${colorToCss(panelColor)};`,
-      constraints: new Clutter.BindConstraint({
-        source: Main.layoutManager.panelBox,
-        coordinate: Clutter.BindCoordinate.ALL,
-      }),
+      style: [
+        `background-color: ${colorToCss(panelForeground, TRACK_BACKGROUND_OPACITY)};`,
+        `box-shadow: inset 0 0 0 1px ${colorToCss(panelForeground, TRACK_OUTLINE_OPACITY)};`,
+        "border-radius: 9px;",
+      ].join(" "),
     });
-    this._backdrop.add_child(this._fill);
+    this.actor.add_child(this._fill);
+    this.actor.hide();
 
-    Main.uiGroup.insert_child_below(
-      this._backdrop,
-      Main.layoutManager.panelBox
-    );
-
-    const previousStyle = this._previousPanelStyle
-      ? `${this._previousPanelStyle} `
-      : "";
-    Main.panel.set_style(
-      `${previousStyle}background-color: transparent; box-shadow: none;`
-    );
-
-    this._widthSignalId = this._backdrop.connect("notify::width", () => {
+    this._allocationSignalId = this.actor.connect("notify::allocation", () => {
       this._updateFillWidth();
-    });
-    this._overviewShowingSignalId = Main.overview.connect("showing", () => {
-      this._backdrop.hide();
-    });
-    this._overviewHidingSignalId = Main.overview.connect("hiding", () => {
-      this._backdrop.show();
     });
   }
 
   setProgress(fraction, color) {
     this._fraction = Math.min(1, Math.max(0, fraction));
     this._hasProgress = true;
-    this._fill.set_style(`background-color: ${color};`);
+    this._fill.set_style(
+      `background-color: ${color}; border-radius: 8px;`
+    );
     this._fill.show();
+    this.actor.show();
     this._updateFillWidth();
   }
 
   hideProgress() {
     this._hasProgress = false;
     this._fill.hide();
+    this.actor.hide();
   }
 
   destroy() {
-    this._backdrop.disconnect(this._widthSignalId);
-    Main.overview.disconnect(this._overviewShowingSignalId);
-    Main.overview.disconnect(this._overviewHidingSignalId);
-
-    Main.panel.set_style(this._previousPanelStyle);
-    this._backdrop.destroy();
+    this.actor.disconnect(this._allocationSignalId);
+    this.actor.destroy();
 
     this._fill = null;
-    this._backdrop = null;
+    this.actor = null;
   }
 
   _updateFillWidth() {
@@ -92,11 +79,12 @@ export default class PanelProgress {
       return;
     }
 
-    const backdropWidth = this._backdrop.get_width();
-    const visibleFraction = Math.max(
-      MINIMUM_VISIBLE_FRACTION,
-      this._fraction
+    const trackWidth = Math.max(0, this.actor.get_width() - 2);
+    const trackHeight = Math.max(0, this.actor.get_height() - 2);
+    this._fill.set_position(1, 1);
+    this._fill.set_size(
+      Math.round(trackWidth * this._fraction),
+      trackHeight
     );
-    this._fill.set_width(Math.round(backdropWidth * visibleFraction));
   }
 }

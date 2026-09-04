@@ -10,7 +10,7 @@ and its unmerged [UI overhaul](https://github.com/nanolookc/next-up-2/pull/4).
 - Shows current event in indicator text (optional)
 - **Visual Layouts:** Choose between Default and Minimal (short text) styles to save panel space.
 - **Centered Clock Layout:** The event indicator fills the space between the workspace control and GNOME's independently centered clock.
-- **Panel-wide Progress:** The top bar itself fills during the final hour before the next event starts, or during the final hour of the current event. It uses muted pastel green at 60+ minutes, orange from 10–59 minutes, and red below 10 minutes.
+- **Bounded Countdown Progress:** A clearly outlined track sits behind the event widget during the final hour before the next event starts, or before the current event ends. It fills from empty at 60 minutes to full at the target time, using muted pastel orange and red below 10 minutes.
 - **Theme-safe Text:** Only the progress bar is colored, so the indicator text keeps GNOME's native light or dark theme color.
 - **Early Completion:** Use the drop-down action menu to mark an ongoing event as complete and dismiss it from the top bar.
 - **Keyword Filtering:** Automatically hide events containing specific user-defined keywords.
@@ -38,6 +38,25 @@ To create a publishable extension bundle, run:
 ```
 
 This uses `gnome-extensions pack`, which includes the runtime files for the extension and automatically picks up `schemas/`. Development-only files like `screenshots/` are not added to the ZIP.
+
+## Visual development
+
+GNOME Shell caches loaded JavaScript modules, so disabling and enabling an
+extension is not a reliable reload mechanism. Run the extension in GNOME 49+
+as a nested development session instead:
+
+```bash
+./scripts/preview.sh 43
+```
+
+The command stages the working tree in an isolated data directory, injects a
+meeting at the requested number of minutes, launches `gnome-shell --devkit`,
+captures the rendered desktop to `dist/preview-43-minutes.png`, and closes the
+nested shell. Set `NEXT_UP_PREVIEW_HOLD=true` to leave the preview window open
+after taking the screenshot. The development calendar hook is inactive unless
+`NEXT_UP_PREVIEW_MINUTES` is explicitly set. The bundled compiled schema is
+enough for visual work; install `glib-compile-schemas` before changing schema
+keys or defaults.
 
 ## References
 
