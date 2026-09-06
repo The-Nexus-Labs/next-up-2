@@ -6,8 +6,8 @@
   "url": "https://github.com/The-Nexus-Labs/next-up-2",
   "settings-schema": "org.gnome.shell.extensions.next-up-2",
   "gettext-domain": "next-up-2-indicator-extension",
-  "version": 8,
-  "version-name": "1.6-nexus.2",
+  "version": 9,
+  "version-name": "1.6-nexus.3",
   "donations": {
         "custom": ["https://hrebeni.uk"]
     }

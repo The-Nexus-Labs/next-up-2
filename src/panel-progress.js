@@ -37,8 +37,6 @@ export default class PanelProgress {
       x_expand: true,
       y_align: Clutter.ActorAlign.FILL,
       y_expand: true,
-      margin_left: 3,
-      margin_right: 3,
       clip_to_allocation: true,
       reactive: false,
       style: [
