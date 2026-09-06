@@ -20,12 +20,10 @@ export default class Indicator extends PanelMenu.Button {
   _init() {
     super._init(0.0, _("Next Up 2 Indicator"));
 
-    // The progress track owns the complete pill geometry. Remove the native
-    // panel button inset so hover only adds its translucent shadow without
-    // changing the pill's visible bounds.
-    this.set_style(
-      "border: none; -natural-hpadding: 0px; -minimum-hpadding: 0px;"
-    );
+    // Reuse GNOME's clock-display structure so this pill has exactly the same
+    // vertical inset and hover bounds as the centered clock.
+    this.add_style_class_name("clock-display");
+    this.set_style("-natural-hpadding: 0px; -minimum-hpadding: 0px;");
 
     this._calendarSource = new Calendar.DBusEventSource();
 
@@ -35,6 +33,7 @@ export default class Indicator extends PanelMenu.Button {
 
   _loadGUI() {
     this._menuLayout = new St.Widget({
+      style_class: "clock",
       layout_manager: new Clutter.BinLayout(),
       clip_to_allocation: true,
       y_align: Clutter.ActorAlign.FILL,
