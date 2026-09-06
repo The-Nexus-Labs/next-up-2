@@ -20,6 +20,13 @@ export default class Indicator extends PanelMenu.Button {
   _init() {
     super._init(0.0, _("Next Up 2 Indicator"));
 
+    // The progress track owns the complete pill geometry. Remove the native
+    // panel button inset so hover only adds its translucent shadow without
+    // changing the pill's visible bounds.
+    this.set_style(
+      "border: none; -natural-hpadding: 0px; -minimum-hpadding: 0px;"
+    );
+
     this._calendarSource = new Calendar.DBusEventSource();
 
     this._loadGUI();
@@ -43,6 +50,8 @@ export default class Indicator extends PanelMenu.Button {
       y_align: Clutter.ActorAlign.CENTER,
       x_expand: true,
       x_align: Clutter.ActorAlign.FILL,
+      margin_left: 12,
+      margin_right: 12,
     });
 
     this.icon = new St.Icon({

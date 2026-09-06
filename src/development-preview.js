@@ -7,6 +7,7 @@ import * as Main from "resource:///org/gnome/shell/ui/main.js";
 const PREVIEW_MINUTES_VARIABLE = "NEXT_UP_PREVIEW_MINUTES";
 const PREVIEW_TITLE_VARIABLE = "NEXT_UP_PREVIEW_TITLE";
 const SCREENSHOT_FILE_VARIABLE = "NEXT_UP_SCREENSHOT_FILE";
+const HOVER_VARIABLE = "NEXT_UP_PREVIEW_HOVER";
 
 export function getDevelopmentPreview(now = new Date()) {
   const rawMinutes = GLib.getenv(PREVIEW_MINUTES_VARIABLE);
@@ -48,6 +49,12 @@ export function scheduleDevelopmentScreenshot(onFinished) {
       .finally(onFinished);
     return GLib.SOURCE_REMOVE;
   });
+}
+
+export function applyDevelopmentHover(actor) {
+  if (GLib.getenv(HOVER_VARIABLE) !== null) {
+    actor.add_style_pseudo_class("hover");
+  }
 }
 
 async function captureScreenshot(screenshotFile) {

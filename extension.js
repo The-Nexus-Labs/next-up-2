@@ -27,6 +27,7 @@ import { getCountdownProgress } from "./src/countdown-progress.js";
 import * as DateHelperFunctions from "./src/date.js";
 import PanelLayout from "./src/panel-layout.js";
 import {
+  applyDevelopmentHover,
   getDevelopmentPreview,
   scheduleDevelopmentScreenshot,
 } from "./src/development-preview.js";
@@ -55,6 +56,7 @@ export default class NextUpExtension extends Extension {
       3,
       () => {
         this.loadIndicator();
+        applyDevelopmentHover(this._indicator);
         this.refreshIndicator();
         this._developmentScreenshotSourceId =
           scheduleDevelopmentScreenshot(() => {
