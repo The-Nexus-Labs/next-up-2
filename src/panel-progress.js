@@ -3,7 +3,7 @@ import St from "gi://St";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
-const FILL_OPACITY = 150;
+const FILL_OPACITY = 102;
 const TRACK_BACKGROUND_OPACITY = 24;
 const TRACK_OUTLINE_OPACITY = 82;
 
