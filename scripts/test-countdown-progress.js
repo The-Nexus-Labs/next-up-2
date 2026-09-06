@@ -41,6 +41,26 @@ assertProgress(9, "red", 0.85);
 assertProgress(0, "red", 1);
 assertProgress(30, "yellow", 0.5, true);
 
+const overlappingProgress = getCountdownProgress(
+  {
+    currentEvent: {
+      end: new Date(now.getTime() + 93 * 60000),
+    },
+    nextEvent: {
+      date: new Date(now.getTime() + 30 * 60000),
+    },
+  },
+  now
+);
+if (
+  overlappingProgress.colorBand !== "yellow" ||
+  Math.abs(overlappingProgress.fraction - 0.5) > 0.0001
+) {
+  throw new Error(
+    "Expected an active event to use the upcoming event's 30-minute countdown"
+  );
+}
+
 const noEvent = getCountdownProgress(
   { currentEvent: null, nextEvent: null },
   now

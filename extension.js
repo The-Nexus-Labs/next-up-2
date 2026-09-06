@@ -134,8 +134,9 @@ export default class NextUpExtension extends Extension {
     
     this._indicator.setText(text);
 
-    // 5. Update the theme-safe countdown bar. It targets the current event's
-    // end, or the next event's start when no event is active.
+    // 5. Update the theme-safe countdown bar. It targets the next event's
+    // start whenever one is available, including while another event is active.
+    // A lone current event counts down to its end.
     const progress = getCountdownProgress(
       eventStatus,
       new Date(),

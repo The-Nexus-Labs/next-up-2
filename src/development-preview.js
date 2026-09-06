@@ -6,6 +6,9 @@ import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
 const PREVIEW_MINUTES_VARIABLE = "NEXT_UP_PREVIEW_MINUTES";
 const PREVIEW_TITLE_VARIABLE = "NEXT_UP_PREVIEW_TITLE";
+const PREVIEW_CURRENT_END_MINUTES_VARIABLE =
+  "NEXT_UP_PREVIEW_CURRENT_END_MINUTES";
+const PREVIEW_CURRENT_TITLE_VARIABLE = "NEXT_UP_PREVIEW_CURRENT_TITLE";
 const SCREENSHOT_FILE_VARIABLE = "NEXT_UP_SCREENSHOT_FILE";
 const HOVER_VARIABLE = "NEXT_UP_PREVIEW_HOVER";
 
@@ -23,9 +26,30 @@ export function getDevelopmentPreview(now = new Date()) {
 
   const title = GLib.getenv(PREVIEW_TITLE_VARIABLE) ?? "Development preview";
   const date = new Date(now.getTime() + minutes * 60000);
+  const rawCurrentEndMinutes = GLib.getenv(
+    PREVIEW_CURRENT_END_MINUTES_VARIABLE
+  );
+  let currentEvent = null;
+
+  if (rawCurrentEndMinutes !== null) {
+    const currentEndMinutes = Number.parseInt(rawCurrentEndMinutes, 10);
+    if (!Number.isFinite(currentEndMinutes) || currentEndMinutes < 0) {
+      console.warn(
+        `${PREVIEW_CURRENT_END_MINUTES_VARIABLE} must be a non-negative integer`
+      );
+      return null;
+    }
+
+    currentEvent = {
+      summary:
+        GLib.getenv(PREVIEW_CURRENT_TITLE_VARIABLE) ?? "Current meeting",
+      date: new Date(now.getTime() - 30 * 60000),
+      end: new Date(now.getTime() + currentEndMinutes * 60000),
+    };
+  }
 
   return {
-    currentEvent: null,
+    currentEvent,
     nextEvent: {
       summary: title,
       date,
