@@ -4,6 +4,39 @@ A GNOME Shell extension that shows your next calendar event in the status bar.
 This Nexus Labs fork builds on [Next Up 2](https://github.com/nanolookc/next-up-2)
 and its unmerged [UI overhaul](https://github.com/nanolookc/next-up-2/pull/4).
 
+## See your next meeting getting closer
+
+A colored progress bar fills behind the event text during the final hour before
+your next meeting. A glance tells you how much time you have left, while the
+clock stays centered and the text keeps GNOME's native theme color.
+
+**Green — time to focus.** With 43 minutes to go, the bar is just getting started.
+Green covers 31–60 minutes remaining with the default settings.
+
+![Green countdown bar: Design review starts in 43 minutes.](screenshots/countdown-green.png)
+
+**Yellow — wrap things up.** At 20 minutes, the bar is two-thirds full.
+Yellow covers 11–30 minutes remaining.
+
+![Yellow countdown bar: Design review starts in 20 minutes.](screenshots/countdown-yellow.png)
+
+**Red — almost time.** With 5 minutes left, the bar is nearly full.
+Red covers the final 10 minutes.
+
+![Red countdown bar: Design review starts in 5 minutes.](screenshots/countdown-red.png)
+
+### Already in a meeting? Keep the next one in sight
+
+It's **9:35**: **Team sync** still has **25 minutes** left, but **Design review**
+starts at **9:45 — in 10 minutes**. Both events stay visible, and the red progress
+bar counts down to the next meeting's start, even though the current meeting
+will still be running.
+
+![Overlapping meetings at 9:35: Team sync ends in 25 minutes, while Design review starts at 9:45. The countdown bar is red.](screenshots/countdown-overlap.png)
+
+These are actual GNOME 50 captures from a nested development session using
+sample events and the default colors, cropped to just the event bar and clock.
+
 ## Features
 
 - Supports GNOME 48, 49, 50
@@ -16,11 +49,6 @@ and its unmerged [UI overhaul](https://github.com/nanolookc/next-up-2/pull/4).
 - **Early Completion:** Use the drop-down action menu to mark an ongoing event as complete and dismiss it from the top bar.
 - **Keyword Filtering:** Automatically hide events containing specific user-defined keywords.
 - **Dynamic Sizing:** The indicator follows the available monitor width and gracefully truncates long event text.
-
-![screenshot1](screenshots/screenshot1.png)
-![screenshot2](screenshots/screenshot2.png)
-![screenshot3](screenshots/screenshot3.png)
-![screenshot4](screenshots/screenshot4.png)
 
 Tested on GNOME 49 and 50.
 
