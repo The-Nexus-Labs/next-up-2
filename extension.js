@@ -20,11 +20,17 @@ import GLib from "gi://GLib";
 import GObject from "gi://GObject";
 import Gio from "gi://Gio";
 
-import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 
 import Indicator from "./src/indicator.js";
+import { getCountdownProgress } from "./src/countdown-progress.js";
 import * as DateHelperFunctions from "./src/date.js";
+import PanelLayout from "./src/panel-layout.js";
+import {
+  applyDevelopmentHover,
+  getDevelopmentPreview,
+  scheduleDevelopmentScreenshot,
+} from "./src/development-preview.js";
 
 const IndicatorInstance = GObject.registerClass(Indicator);
 
@@ -39,15 +45,9 @@ export default class NextUpExtension extends Extension {
       ),
       openPrefsCallback: this.openPreferences.bind(this),
     });
+    this._panelLayout = new PanelLayout(this._indicator.container);
 
     this._settings = this.getSettings();
-    this._settingChangedSignal = this._settings.connect(
-      "changed::which-panel",
-      () => {
-        this.unloadIndicator();
-        this.loadIndicator();
-      }
-    );
 
     // Wait 3 seconds before loading the indicator
     // So that it isn't loaded too early and positioned after other elements in the panel
@@ -56,6 +56,12 @@ export default class NextUpExtension extends Extension {
       3,
       () => {
         this.loadIndicator();
+        applyDevelopmentHover(this._indicator);
+        this.refreshIndicator();
+        this._developmentScreenshotSourceId =
+          scheduleDevelopmentScreenshot(() => {
+            this._developmentScreenshotSourceId = null;
+          });
         this._startLoop();
         return false;
       }
@@ -74,24 +80,11 @@ export default class NextUpExtension extends Extension {
   }
 
   loadIndicator() {
-    const boxes = [
-      Main.panel._leftBox,
-      Main.panel._centerBox,
-      Main.panel._rightBox,
-    ];
-
-    const whichPanel = this._settings.get_int("which-panel");
-
-    // If aligned to left, place it after workspaces indicator
-    const index = whichPanel === 0 ? 1 : 0;
-
-    boxes[whichPanel].insert_child_at_index(this._indicator.container, index);
+    this._panelLayout.attach();
   }
 
   unloadIndicator() {
-    this._indicator.container
-      .get_parent()
-      .remove_child(this._indicator.container);
+    this._panelLayout.detach();
   }
 
   refreshIndicator() {
@@ -117,7 +110,9 @@ export default class NextUpExtension extends Extension {
       return true;
     });
 
-    let eventStatus = DateHelperFunctions.getNextEventsToDisplay(todaysEvents);
+    let eventStatus =
+      getDevelopmentPreview(new Date()) ??
+      DateHelperFunctions.getNextEventsToDisplay(todaysEvents);
 
     // 3. Hide Next When Active
     if (this._settings.get_boolean("hide-next-when-active") && eventStatus.currentEvent) {
@@ -139,37 +134,26 @@ export default class NextUpExtension extends Extension {
     
     this._indicator.setText(text);
 
-    // 5. Calculate Colors (Active vs Warning vs Urgency)
-    let bgColor = "transparent";
-    const nowMs = Date.now();
-    
-    if (eventStatus.currentEvent && eventStatus.currentEvent.end) {
-      // Event is ongoing. Check how close it is to ENDING (Urgency/Red)
-      const minsLeftToEnd = Math.ceil((eventStatus.currentEvent.end.getTime() - nowMs) / 60000);
-      const urgencyThresh = this._settings.get_int("urgency-threshold");
-
-      if (minsLeftToEnd >= 0 && minsLeftToEnd <= urgencyThresh) {
-        bgColor = this._settings.get_string("urgency-color"); // Near the end -> Turn Red
-      } else {
-        bgColor = this._settings.get_string("active-bg-color"); // Otherwise -> Standard active color
-      }
-      
-    } else if (eventStatus.nextEvent && eventStatus.nextEvent.date) {
-      // No active event. Check how close the next one is to STARTING (Warning/Yellow)
-      const minsLeftToStart = Math.ceil((eventStatus.nextEvent.date.getTime() - nowMs) / 60000);
-      const warningThresh = this._settings.get_int("warning-threshold");
-
-      if (minsLeftToStart >= 0 && minsLeftToStart <= warningThresh) {
-        bgColor = this._settings.get_string("warning-color"); // Starting soon -> Turn Yellow
-      }
+    // 5. Update the theme-safe countdown bar. It targets the next event's
+    // start whenever one is available, including while another event is active.
+    // A lone current event counts down to its end.
+    const progress = getCountdownProgress(
+      eventStatus,
+      new Date(),
+      this._settings.get_int("progress-orange-threshold"),
+      this._settings.get_int("progress-yellow-threshold"),
+      this._settings.get_int("progress-red-threshold")
+    );
+    if (progress === null) {
+      this._indicator.hideProgress();
+    } else {
+      const progressColor = this._settings.get_string(
+        `progress-${progress.colorBand}-color`
+      );
+      this._indicator.setProgress(progress.fraction, progressColor);
     }
 
-    // 6. Push UI overrides and Early Completion state down to the indicator
-    const maxWidth = this._settings.get_int("max-width");
-    
-    // We will build these two methods in indicator.js next
-    this._indicator.applyCustomStyles(bgColor, maxWidth);
-
+    // 6. Push Early Completion state down to the indicator
     if (eventStatus.currentEvent) {
       const currentSummary = (eventStatus.currentEvent.summary || "").toLowerCase();
       const eventKey = currentSummary + (eventStatus.currentEvent.date ? eventStatus.currentEvent.date.getTime() : "");
@@ -186,16 +170,6 @@ export default class NextUpExtension extends Extension {
   }
 
   disable() {
-    Main.panel._centerBox.remove_child(this._indicator.container);
-
-    this._settings.disconnect(this._settingChangedSignal);
-    this._settings = null;
-
-    this._indicator.destroy();
-    this._indicator = null;
-
-    this._dismissedEvents.clear(); // Free memory
-
     if (this.sourceId) {
       GLib.Source.remove(this.sourceId);
       this.sourceId = null;
@@ -205,5 +179,20 @@ export default class NextUpExtension extends Extension {
       GLib.Source.remove(this.delaySourceId);
       this.delaySourceId = null;
     }
+
+    if (this._developmentScreenshotSourceId) {
+      GLib.Source.remove(this._developmentScreenshotSourceId);
+      this._developmentScreenshotSourceId = null;
+    }
+
+    this.unloadIndicator();
+    this._indicator.destroy();
+    this._indicator = null;
+    this._panelLayout = null;
+
+    this._settings = null;
+
+    this._dismissedEvents.clear();
+    this._dismissedEvents = null;
   }
 }

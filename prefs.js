@@ -22,17 +22,6 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
     const groupGeneral = new Adw.PreferencesGroup({ title: _("General Layout & Text") });
     page.add(groupGeneral);
 
-    // Original: Panel to show indicator
-    const panelRow = new Adw.ActionRow({ title: _("Panel to show indicator in") });
-    const dropdown = new Gtk.DropDown({
-      model: Gtk.StringList.new([_("Left"), _("Center"), _("Right")]),
-      valign: Gtk.Align.CENTER,
-    });
-    settings.bind("which-panel", dropdown, "selected", Gio.SettingsBindFlags.DEFAULT);
-    panelRow.add_suffix(dropdown);
-    panelRow.activatable_widget = dropdown;
-    groupGeneral.add(panelRow);
-
     // Original: Show current event in text
     const textRow = new Adw.ActionRow({ title: _("Show current event in indicator text") });
     const textDropdown = new Gtk.DropDown({
@@ -55,19 +44,6 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
     layoutRow.activatable_widget = layoutDropdown;
     groupGeneral.add(layoutRow);
 
-    // New: Max Width
-    const maxWidthRow = new Adw.ActionRow({
-      title: _("Maximum Indicator Width"),
-      subtitle: _("Pixels before text truncates")
-    });
-    const maxWidthSpin = new Gtk.SpinButton({
-      adjustment: new Gtk.Adjustment({ lower: 50, upper: 1000, step_increment: 10 }),
-      valign: Gtk.Align.CENTER
-    });
-    settings.bind("max-width", maxWidthSpin, "value", Gio.SettingsBindFlags.DEFAULT);
-    maxWidthRow.add_suffix(maxWidthSpin);
-    groupGeneral.add(maxWidthRow);
-
     // New: Done Text
     const doneTextRow = new Adw.EntryRow({ title: _("Done for the day text") });
     settings.bind("done-text", doneTextRow, "text", Gio.SettingsBindFlags.DEFAULT);
@@ -81,98 +57,101 @@ export default class NextUpExtensionPreferences extends ExtensionPreferences {
     groupGeneral.add(excludedRow);
 
     // ==========================================
-    // GROUP 2: Visuals & Colors
+    // GROUP 2: Countdown Progress
     // ==========================================
-    const groupVisual = new Adw.PreferencesGroup({ title: _("Visuals & Colors") });
+    const groupVisual = new Adw.PreferencesGroup({
+      title: _("Countdown Progress"),
+      description: _(
+        "The bar fills during the final hour before the next event starts, or before the current event ends."
+      ),
+    });
     page.add(groupVisual);
 
-    // Helper function to create native color pickers
     const addColorPicker = (key, title) => {
-      const row = new Adw.ActionRow({ title: title });
-      
-      // Convert the saved string (e.g. '#ff0000') into a GNOME color object
+      const row = new Adw.ActionRow({ title });
       const rgba = new Gdk.RGBA();
       rgba.parse(settings.get_string(key));
-      
-      const colorBtn = new Gtk.ColorButton({
-        rgba: rgba,
-        use_alpha: true, // Allows transparency
-        valign: Gtk.Align.CENTER
+
+      const colorButton = new Gtk.ColorButton({
+        rgba,
+        use_alpha: false,
+        valign: Gtk.Align.CENTER,
+      });
+      colorButton.connect("notify::rgba", () => {
+        settings.set_string(key, colorButton.get_rgba().to_string());
       });
 
-      // When the user clicks "Select" in the color window, save it back as a string
-      colorBtn.connect('notify::rgba', () => {
-        settings.set_string(key, colorBtn.get_rgba().to_string());
-      });
-
-      row.add_suffix(colorBtn);
-      row.activatable_widget = colorBtn;
+      row.add_suffix(colorButton);
+      row.activatable_widget = colorButton;
       groupVisual.add(row);
     };
 
-    // Add our three beautiful new native color pickers
-    addColorPicker("active-bg-color", _("Active Event Background Color"));
-    addColorPicker("warning-color", _("Warning Color (Before event starts)"));
-    addColorPicker("urgency-color", _("Urgency Color (Before event ends)"));
+    addColorPicker("progress-green-color", _("31 to 60 minutes"));
+    addColorPicker("progress-yellow-color", _("11 to 30 minutes"));
+    addColorPicker("progress-red-color", _("0 to 10 minutes"));
 
-    const warningThreshRow = new Adw.ActionRow({ title: _("Warning Threshold (Minutes before start)") });
-    const warningSpin = new Gtk.SpinButton({
-      adjustment: new Gtk.Adjustment({ lower: 0, upper: 120, step_increment: 1 }),
-      valign: Gtk.Align.CENTER
+    const progressWindowRow = new Adw.ActionRow({
+      title: _("Progress window"),
+      subtitle: _("Minutes remaining"),
     });
-    settings.bind("warning-threshold", warningSpin, "value", Gio.SettingsBindFlags.DEFAULT);
-    warningThreshRow.add_suffix(warningSpin);
-    groupVisual.add(warningThreshRow);
-
-    const urgencyThreshRow = new Adw.ActionRow({ title: _("Urgency Threshold (Minutes before end)") });
-    const urgencySpin = new Gtk.SpinButton({
-      adjustment: new Gtk.Adjustment({ lower: 0, upper: 60, step_increment: 1 }),
-      valign: Gtk.Align.CENTER
+    const progressWindowSpin = new Gtk.SpinButton({
+      adjustment: new Gtk.Adjustment({
+        lower: 1,
+        upper: 240,
+        step_increment: 1,
+      }),
+      valign: Gtk.Align.CENTER,
     });
-    settings.bind("urgency-threshold", urgencySpin, "value", Gio.SettingsBindFlags.DEFAULT);
-    urgencyThreshRow.add_suffix(urgencySpin);
-    groupVisual.add(urgencyThreshRow);
+    settings.bind(
+      "progress-orange-threshold",
+      progressWindowSpin,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT
+    );
+    progressWindowRow.add_suffix(progressWindowSpin);
+    groupVisual.add(progressWindowRow);
 
-    // // Active Event BG Color
-    // const activeBgRow = new Adw.EntryRow({
-    //   title: _("Active Event Background Color"),
-    // });
-    // settings.bind("active-bg-color", activeBgRow, "text", Gio.SettingsBindFlags.DEFAULT);
-    // groupVisual.add(activeBgRow);
+    const yellowThresholdRow = new Adw.ActionRow({
+      title: _("Yellow threshold"),
+      subtitle: _("Minutes remaining"),
+    });
+    const yellowThresholdSpin = new Gtk.SpinButton({
+      adjustment: new Gtk.Adjustment({
+        lower: 0,
+        upper: 120,
+        step_increment: 1,
+      }),
+      valign: Gtk.Align.CENTER,
+    });
+    settings.bind(
+      "progress-yellow-threshold",
+      yellowThresholdSpin,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT
+    );
+    yellowThresholdRow.add_suffix(yellowThresholdSpin);
+    groupVisual.add(yellowThresholdRow);
 
-    // // Warning Color
-    // const warningColorRow = new Adw.EntryRow({
-    //   title: _("Warning Color (Before Event Starts)"),
-    // });
-    // settings.bind("warning-color", warningColorRow, "text", Gio.SettingsBindFlags.DEFAULT);
-    // groupVisual.add(warningColorRow);
-
-    // // Warning Threshold
-    // const warningThreshRow = new Adw.ActionRow({ title: _("Warning Threshold (Minutes Before Start)") });
-    // const warningSpin = new Gtk.SpinButton({
-    //   adjustment: new Gtk.Adjustment({ lower: 0, upper: 120, step_increment: 1 }),
-    //   valign: Gtk.Align.CENTER
-    // });
-    // settings.bind("warning-threshold", warningSpin, "value", Gio.SettingsBindFlags.DEFAULT);
-    // warningThreshRow.add_suffix(warningSpin);
-    // groupVisual.add(warningThreshRow);
-
-    // // Urgency Color (Before End)
-    // const urgencyColorRow = new Adw.EntryRow({
-    //   title: _("Urgency Color (Before Event Ends)"),
-    // });
-    // settings.bind("urgency-color", urgencyColorRow, "text", Gio.SettingsBindFlags.DEFAULT);
-    // groupVisual.add(urgencyColorRow);
-
-    // // Urgency Threshold
-    // const urgencyThreshRow = new Adw.ActionRow({ title: _("Urgency Threshold (Minutes Before End)") });
-    // const urgencySpin = new Gtk.SpinButton({
-    //   adjustment: new Gtk.Adjustment({ lower: 0, upper: 60, step_increment: 1 }),
-    //   valign: Gtk.Align.CENTER
-    // });
-    // settings.bind("urgency-threshold", urgencySpin, "value", Gio.SettingsBindFlags.DEFAULT);
-    // urgencyThreshRow.add_suffix(urgencySpin);
-    // groupVisual.add(urgencyThreshRow);
+    const redThresholdRow = new Adw.ActionRow({
+      title: _("Red threshold"),
+      subtitle: _("Minutes remaining"),
+    });
+    const redThresholdSpin = new Gtk.SpinButton({
+      adjustment: new Gtk.Adjustment({
+        lower: 0,
+        upper: 60,
+        step_increment: 1,
+      }),
+      valign: Gtk.Align.CENTER,
+    });
+    settings.bind(
+      "progress-red-threshold",
+      redThresholdSpin,
+      "value",
+      Gio.SettingsBindFlags.DEFAULT
+    );
+    redThresholdRow.add_suffix(redThresholdSpin);
+    groupVisual.add(redThresholdRow);
 
     // ==========================================
     // GROUP 3: Behavior & Toggles

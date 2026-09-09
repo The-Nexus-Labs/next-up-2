@@ -1,10 +1,13 @@
 import St from "gi://St";
 import Clutter from "gi://Clutter";
+import Pango from "gi://Pango";
 import * as Calendar from "resource:///org/gnome/shell/ui/calendar.js";
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import * as PopupMenu from "resource:///org/gnome/shell/ui/popupMenu.js";
 import { gettext as _ } from "resource:///org/gnome/shell/extensions/extension.js";
+
+import PanelProgress from "./panel-progress.js";
 
 export default class Indicator extends PanelMenu.Button {
   constructor(props) {
@@ -17,6 +20,11 @@ export default class Indicator extends PanelMenu.Button {
   _init() {
     super._init(0.0, _("Next Up 2 Indicator"));
 
+    // Reuse GNOME's clock-display structure so this pill has exactly the same
+    // vertical inset and hover bounds as the centered clock.
+    this.add_style_class_name("clock-display");
+    this.set_style("-natural-hpadding: 0px; -minimum-hpadding: 0px;");
+
     this._calendarSource = new Calendar.DBusEventSource();
 
     this._loadGUI();
@@ -24,13 +32,25 @@ export default class Indicator extends PanelMenu.Button {
   }
 
   _loadGUI() {
-    this._menuLayout = new St.BoxLayout({
-      vertical: false,
+    this._menuLayout = new St.Widget({
+      style_class: "clock",
+      layout_manager: new Clutter.BinLayout(),
       clip_to_allocation: true,
-      x_align: Clutter.ActorAlign.START,
-      y_align: Clutter.ActorAlign.CENTER,
-      reactive: true,
+      y_align: Clutter.ActorAlign.FILL,
+      y_expand: true,
       x_expand: true,
+      x_align: Clutter.ActorAlign.FILL,
+    });
+
+    this._panelProgress = new PanelProgress();
+
+    this._contentLayout = new St.BoxLayout({
+      vertical: false,
+      y_align: Clutter.ActorAlign.CENTER,
+      x_expand: true,
+      x_align: Clutter.ActorAlign.FILL,
+      margin_left: 12,
+      margin_right: 12,
     });
 
     this.icon = new St.Icon({
@@ -41,13 +61,21 @@ export default class Indicator extends PanelMenu.Button {
     // Ensure the label truncates neatly with CSS
     this.text = new St.Label({
       text: "Loading",
+      x_expand: true,
+      x_align: Clutter.ActorAlign.FILL,
       y_expand: true,
       y_align: Clutter.ActorAlign.CENTER,
-      style: "text-overflow: ellipsis; white-space: nowrap;"
+      style: "text-overflow: ellipsis; white-space: nowrap;",
     });
+    this.text.clutter_text.ellipsize = Pango.EllipsizeMode.END;
+    this.text.clutter_text.single_line_mode = true;
 
-    this._menuLayout.add_child(this.icon);
-    this._menuLayout.add_child(this.text);
+    this._contentLayout.add_child(this.icon);
+    this._contentLayout.add_child(this.text);
+
+    this._menuLayout.add_child(this._panelProgress.actor);
+    this._menuLayout.add_child(this._contentLayout);
+
     this.add_child(this._menuLayout);
   }
 
@@ -110,6 +138,14 @@ export default class Indicator extends PanelMenu.Button {
     this.text.set_text(text);
   }
 
+  setProgress(fraction, color) {
+    this._panelProgress.setProgress(fraction, color);
+  }
+
+  hideProgress() {
+    this._panelProgress.hideProgress();
+  }
+
   showAlarmIcon() {
     this.icon.set_icon_name("alarm-symbolic");
     this.icon.show();
@@ -122,11 +158,6 @@ export default class Indicator extends PanelMenu.Button {
     } else {
       this.icon.hide();
     }
-  }
-
-  applyCustomStyles(bgColor, maxWidth) {
-    const padding = bgColor !== "transparent" && bgColor !== "" ? "padding: 0 8px; border-radius: 6px;" : "";
-    this._menuLayout.set_style(`background-color: ${bgColor}; max-width: ${maxWidth}px; ${padding}`);
   }
 
   setupEarlyCompletion(enable, callback) {
@@ -147,6 +178,8 @@ export default class Indicator extends PanelMenu.Button {
       this._calendarSource.destroy();
       this._calendarSource = null;
     }
+    this._panelProgress.destroy();
+    this._panelProgress = null;
     super.destroy();
   }
 }
