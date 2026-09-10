@@ -60,6 +60,13 @@ such as through the accompanying NixOS configuration.
 
 ## Build
 
+Run the event-selection and countdown checks with Node.js:
+
+```bash
+node --test --test-concurrency=2 scripts/test-event-selection.js
+node scripts/test-countdown-progress.js
+```
+
 To create a publishable extension bundle, run:
 
 ```bash
