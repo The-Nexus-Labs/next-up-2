@@ -27,36 +27,21 @@ export function getTodaysEvents(calendarSource, showAllDayEvents) {
     : rawEvents.filter((event) => !isAllDayEvent(event));
 }
 
-export function getNextEventsToDisplay(todaysEvents) {
-  const now = new Date();
-  const N = todaysEvents.length;
-
+export function getNextEventsToDisplay(todaysEvents, now = new Date()) {
   let currentEvent = null;
   let nextEvent = null;
-  let done = false;
 
-  for (let i = 0; i < N; i++) {
-    if (done) break;
-
-    const event = todaysEvents[i];
+  for (const event of todaysEvents) {
     if (now < event.date) {
-      nextEvent = event;
-      break;
-    } else if (now < event.end) {
-      currentEvent = event;
-      // Check whether there's an event after this one
-      if (i < N - 1) {
-        for (let j = i + 1; j < N; j++) {
-          let someNextEvent = todaysEvents[j];
-          // Check whether the next event overlaps the current event
-          // or whether they start at the same time
-          if (!(someNextEvent.date.valueOf() === currentEvent.date.valueOf())) {
-            nextEvent = someNextEvent;
-            done = true;
-            break;
-          }
-        }
+      if (!nextEvent || event.date < nextEvent.date) {
+        nextEvent = event;
       }
+    } else if (
+      now < event.end &&
+      (!currentEvent || event.date < currentEvent.date)
+    ) {
+      // Keep the earliest ongoing event, even when later events overlap it.
+      currentEvent = event;
     }
   }
 
