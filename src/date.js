@@ -28,24 +28,24 @@ export function getTodaysEvents(calendarSource, showAllDayEvents) {
 }
 
 export function getNextEventsToDisplay(todaysEvents, now = new Date()) {
-  let currentEvent = null;
-  let nextEvent = null;
+  const currentEvents = [];
+  let nextEvents = [];
 
   for (const event of todaysEvents) {
     if (now < event.date) {
-      if (!nextEvent || event.date < nextEvent.date) {
-        nextEvent = event;
+      if (!nextEvents.length || event.date < nextEvents[0].date) {
+        nextEvents = [event];
+      } else if (event.date.getTime() === nextEvents[0].date.getTime()) {
+        nextEvents.push(event);
       }
-    } else if (
-      now < event.end &&
-      (!currentEvent || event.date < currentEvent.date)
-    ) {
-      // Keep the earliest ongoing event, even when later events overlap it.
-      currentEvent = event;
+    } else if (now < event.end) {
+      currentEvents.push(event);
     }
   }
 
-  return { currentEvent, nextEvent };
+  // Preserve calendar order for ties; active events count down to the first end.
+  currentEvents.sort((left, right) => left.end - right.end);
+  return { currentEvents, nextEvents };
 }
 
 // Added layoutStyle parameter
@@ -112,7 +112,21 @@ export function eventStatusToIndicatorText(eventStatus, textFormat, layoutStyle 
       : `Ends in ${getTimeToEventAsText(event.end)}: ${summary}`;
   }
 
-  const { currentEvent, nextEvent } = eventStatus;
+  const { currentEvents, nextEvents } = eventStatus;
+  // Upcoming events share a start, so display their titles with one countdown.
+  const nextEvent = nextEvents.length ? {
+    ...nextEvents[0],
+    summary: nextEvents.map(getEventSummary).join(" + "),
+  } : null;
+  const currentEvent = currentEvents[0] ?? null;
+
+  if (currentEvents.length > 1) {
+    const currentText = currentEvents.map(event => isAllDayEvent(event)
+      ? displayCurrentEvent(event)
+      : `${getEventSummary(event)} (${getTimeToEventAsText(event.end, true)} left)`
+    ).join(" | ");
+    return nextEvent ? `${currentText} — ${displayNextEvent(nextEvent)}` : currentText;
+  }
 
   if (currentEvent != null) {
     if (nextEvent != null) {

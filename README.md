@@ -37,10 +37,19 @@ will still be running.
 These are actual GNOME 50 captures from a nested development session using
 sample events and the default colors, cropped to just the event bar and clock.
 
+### Events starting together
+
+Events sharing the next start time appear together with one countdown. Once active, each event shows its own remaining time and disappears when it ends.
+
+![Two events starting together.](screenshots/simultaneous-upcoming.png)
+
+![Both active events with their remaining time.](screenshots/simultaneous-active.png)
+
 ## Features
 
 - Supports GNOME 48, 49, 50
-- Shows current event in indicator text (optional)
+- Shows every active event and all events sharing the next start time, with a countdown for each active event.
+- Early completion dismisses the named active event that ends first.
 - **Visual Layouts:** Choose between Default and Minimal (short text) styles to save panel space.
 - **Centered Clock Layout:** The event indicator fills the space between the workspace control and GNOME's independently centered clock.
 - **Bounded Countdown Progress:** A full-height, pill-shaped track sits behind the event widget during the final hour before the next event starts, or before the current event ends. It fills from empty at 60 minutes to full at the target time, using green through 31 minutes, yellow through 11 minutes, and red for the final 10 minutes.
@@ -90,7 +99,8 @@ meeting at the requested number of minutes, launches `gnome-shell --devkit`,
 captures the rendered desktop to `dist/preview-43-minutes.png`, and closes the
 nested shell. Set `NEXT_UP_PREVIEW_HOLD=true` to leave the preview window open
 after taking the screenshot. The development calendar hook is inactive unless
-`NEXT_UP_PREVIEW_MINUTES` is explicitly set. The bundled compiled schema is
+`NEXT_UP_PREVIEW_MINUTES` or `NEXT_UP_PREVIEW_EVENTS_JSON` is explicitly set.
+For simultaneous-event previews, `NEXT_UP_PREVIEW_EVENTS_JSON` accepts an array of `{ "summary": "Meeting", "startMinutes": 10, "endMinutes": 55 }` objects with times relative to now. The bundled compiled schema is
 enough for visual work; install `glib-compile-schemas` before changing schema
 keys or defaults.
 

@@ -7,12 +7,12 @@ function clamp(value, minimum, maximum) {
 }
 
 function countdownTarget(eventStatus) {
-  if (eventStatus.nextEvent?.date instanceof Date) {
-    return eventStatus.nextEvent.date;
+  if (eventStatus.nextEvents[0]?.date instanceof Date) {
+    return eventStatus.nextEvents[0].date;
   }
 
-  if (eventStatus.currentEvent?.end instanceof Date) {
-    return eventStatus.currentEvent.end;
+  if (eventStatus.currentEvents[0]?.end instanceof Date) {
+    return eventStatus.currentEvents[0].end;
   }
 
   return null;

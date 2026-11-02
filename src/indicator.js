@@ -160,7 +160,8 @@ export default class Indicator extends PanelMenu.Button {
     }
   }
 
-  setupEarlyCompletion(enable, callback) {
+  setupEarlyCompletion(enable, callback, summary = "") {
+    this._completeBtn.label = summary ? `Complete: ${summary}` : "Complete Task";
     if (enable && callback) {
       this._completeBtn.reactive = true;
       this._completeBtn.opacity = 255; // Fully opaque (enabled)

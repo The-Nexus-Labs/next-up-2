@@ -4,6 +4,8 @@ import Shell from "gi://Shell";
 
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
+import { getNextEventsToDisplay } from "./date.js";
+
 const PREVIEW_MINUTES_VARIABLE = "NEXT_UP_PREVIEW_MINUTES";
 const PREVIEW_TITLE_VARIABLE = "NEXT_UP_PREVIEW_TITLE";
 const PREVIEW_CURRENT_END_MINUTES_VARIABLE =
@@ -13,6 +15,16 @@ const SCREENSHOT_FILE_VARIABLE = "NEXT_UP_SCREENSHOT_FILE";
 const HOVER_VARIABLE = "NEXT_UP_PREVIEW_HOVER";
 
 export function getDevelopmentPreview(now = new Date()) {
+  const rawEvents = GLib.getenv("NEXT_UP_PREVIEW_EVENTS_JSON");
+  if (rawEvents !== null) {
+    const events = JSON.parse(rawEvents).map(({ summary, startMinutes, endMinutes }) => ({
+      summary,
+      date: new Date(now.getTime() + startMinutes * 60000),
+      end: new Date(now.getTime() + endMinutes * 60000),
+    }));
+    return getNextEventsToDisplay(events, now);
+  }
+
   const rawMinutes = GLib.getenv(PREVIEW_MINUTES_VARIABLE);
   if (rawMinutes === null) {
     return null;
@@ -49,12 +61,12 @@ export function getDevelopmentPreview(now = new Date()) {
   }
 
   return {
-    currentEvent,
-    nextEvent: {
+    currentEvents: currentEvent ? [currentEvent] : [],
+    nextEvents: [{
       summary: title,
       date,
       end: new Date(date.getTime() + 30 * 60000),
-    },
+    }],
   };
 }
 

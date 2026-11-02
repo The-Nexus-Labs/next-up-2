@@ -115,13 +115,13 @@ export default class NextUpExtension extends Extension {
       DateHelperFunctions.getNextEventsToDisplay(todaysEvents);
 
     // 3. Hide Next When Active
-    if (this._settings.get_boolean("hide-next-when-active") && eventStatus.currentEvent) {
-      eventStatus.nextEvent = null;
+    if (this._settings.get_boolean("hide-next-when-active") && eventStatus.currentEvents.length) {
+      eventStatus.nextEvents = [];
     }
 
     // 4. Generate Text (Custom 'Done for today' override)
     let text = "";
-    if (!eventStatus.currentEvent && !eventStatus.nextEvent) {
+    if (!eventStatus.currentEvents.length && !eventStatus.nextEvents.length) {
       text = this._settings.get_string("done-text");
       const showConfetti = this._settings.get_boolean("show-confetti-icon");
       this._indicator.showConfettiIcon(showConfetti);
@@ -154,15 +154,17 @@ export default class NextUpExtension extends Extension {
     }
 
     // 6. Push Early Completion state down to the indicator
-    if (eventStatus.currentEvent) {
-      const currentSummary = (eventStatus.currentEvent.summary || "").toLowerCase();
-      const eventKey = currentSummary + (eventStatus.currentEvent.date ? eventStatus.currentEvent.date.getTime() : "");
+    if (eventStatus.currentEvents.length) {
+      const currentEvent = eventStatus.currentEvents[0];
+      const currentSummary = (currentEvent.summary || "").toLowerCase();
+      const eventKey = currentSummary + (currentEvent.date ? currentEvent.date.getTime() : "");
       this._indicator.setupEarlyCompletion(
         this._settings.get_boolean("enable-early-completion"), 
         () => {
           this._dismissedEvents.add(eventKey);
           this.refreshIndicator(); // Instantly refresh GUI
-        }
+        },
+        currentEvent.summary
       );
     } else {
       this._indicator.setupEarlyCompletion(false, null);

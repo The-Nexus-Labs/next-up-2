@@ -6,8 +6,8 @@ const now = new Date("2026-08-31T10:00:00Z");
 function eventStatus(minutesUntilTarget, current = false) {
   const target = new Date(now.getTime() + minutesUntilTarget * 60000);
   return current
-    ? { currentEvent: { end: target }, nextEvent: null }
-    : { currentEvent: null, nextEvent: { date: target } };
+    ? { currentEvents: [{ end: target }], nextEvents: [] }
+    : { currentEvents: [], nextEvents: [{ date: target }] };
 }
 
 function assertProgress(minutes, expectedBand, expectedFraction, current = false) {
@@ -43,12 +43,12 @@ assertProgress(30, "yellow", 0.5, true);
 
 const overlappingProgress = getCountdownProgress(
   {
-    currentEvent: {
+    currentEvents: [{
       end: new Date(now.getTime() + 93 * 60000),
-    },
-    nextEvent: {
+    }],
+    nextEvents: [{
       date: new Date(now.getTime() + 30 * 60000),
-    },
+    }],
   },
   now
 );
@@ -62,7 +62,7 @@ if (
 }
 
 const noEvent = getCountdownProgress(
-  { currentEvent: null, nextEvent: null },
+  { currentEvents: [], nextEvents: [] },
   now
 );
 if (noEvent !== null) {
